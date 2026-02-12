@@ -26,6 +26,11 @@ func defaultHandlerFunc(h HandlerFuncWithError) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := h(w, r); err != nil {
 			slog.Error("encountered error while serving request", "err", err)
+
+			if err.Status == 0 {
+				err.Status = http.StatusInternalServerError
+			}
+
 			w.WriteHeader(err.Status)
 			errJSON := fmt.Sprintf(
 				`{"error": "%s"}`,
